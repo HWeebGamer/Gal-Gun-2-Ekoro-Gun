@@ -28,4 +28,4 @@ Only ExecuteUbergraph_PointerComponent's function payload changes from v13. A tr
 
 The emitted-bytecode evaluator passes 240 combinations of distance, target class, and gameplay/menu flags, plus easing/recovery at 45, 72, 90, and 120 Hz. UnrealPak validates all 17 entries. These checks do not prove Unreal runtime import resolution or visual behavior in the headset.
 
-Installed for headset testing October 28, 2026; v13 was backed up before installation. Test distant and near enemies, transitions from enemies to walls/empty space, readability in both eyes, and title/pause menus. v14 has not yet been confirmed working in-game or published as a release.
+Installed for headset testing October 28, 2026; v13 was backed up before installation. The user subsequently confirmed v14 works and requested publication. The v14 release packages these exact tested binaries. Future regressions should be checked with distant and near enemies, transitions to walls/empty space, readability in both eyes, and title/pause menus.
