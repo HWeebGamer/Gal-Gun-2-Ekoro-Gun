@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "EkoroPrototype_P.pak",
+    "SHA256": "B6FBDD487AC35D1A8CAEA3D76EA66AA5388D91BDFAB8DD498DC9C718C91461F4",
+    "Bytes": 978926,
+    "Version": "muzzle-pointer-v12-menu-ray-alignment"
+  },
+  {
+    "Name": "EkoroPrototype_P.sig",
+    "SHA256": "04D3AC53A0C186B9D89731D8FB8447FFF575540CB56688063F40027DCAB91E9A",
+    "Bytes": 332904,
+    "Version": "muzzle-pointer-v12-menu-ray-alignment"
+  }
+]
