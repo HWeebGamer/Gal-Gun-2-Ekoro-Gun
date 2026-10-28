@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($ReticleDistance) { $MenuRayAlignment = $true }
 if($MenuRayAlignment) { $InteractionDiagnostic = $true }
 $ErrorActionPreference = 'Stop'
 $workspace = Split-Path $PSScriptRoot
@@ -62,6 +63,13 @@ if($MenuRayAlignment) {
     foreach($extension in @('uasset','uexp')) {
         $file = Join-Path $workspace "work/muzzle-pointer-v12/VRGG/Widgets/VRGG_Widget.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Widgets/VRGG_Widget.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
+    }
+}
+if($ReticleDistance) {
+    $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v13_P.pak'
+    foreach($extension in @('uasset','uexp')) {
+        $file = Join-Path $workspace "work/muzzle-pointer-v13/VRGG/Actors/PointerComponent.$extension"
+        ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
 }
 & $unrealPak $output "-create=$response" '-compress'
