@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($DynamicReticle) { $ReticleDistance = $true }
 if($ReticleDistance) { $MenuRayAlignment = $true }
 if($MenuRayAlignment) { $InteractionDiagnostic = $true }
 $ErrorActionPreference = 'Stop'
@@ -67,8 +68,13 @@ if($MenuRayAlignment) {
 }
 if($ReticleDistance) {
     $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v13_P.pak'
+    $pointerVersion = 'v13'
+    if($DynamicReticle) {
+        $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v14_P.pak'
+        $pointerVersion = 'v14'
+    }
     foreach($extension in @('uasset','uexp')) {
-        $file = Join-Path $workspace "work/muzzle-pointer-v13/VRGG/Actors/PointerComponent.$extension"
+        $file = Join-Path $workspace "work/muzzle-pointer-$pointerVersion/VRGG/Actors/PointerComponent.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
 }

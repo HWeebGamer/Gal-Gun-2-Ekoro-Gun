@@ -19,4 +19,4 @@ The patcher checks the original display/trace defaults and modifies exactly one 
 
 Installed for local testing October 28, 2026. PAK SHA256: `726D090D26B81721F4547FB73478A717BD1FA160E6AE23A9D4494CA8765DEF63`.
 
-Headset validation is pending. In a mission, aim at targets and surfaces beyond five metres: the crosshair should travel farther and sit near the traced surface. Check visibility/size at long range, near-target behavior, and title/pause menu hover and trigger selection. The scaling curve is unchanged; readability at the longer distances needs testing. This is not yet a published release; v12 remains the confirmed downloadable version.
+The user confirmed the longer reach works well on October 28, 2026. They then requested distance-dependent shrinking and enemy-target size feedback, implemented in the v14 test build. v13 is not a published release; v12 remains the downloadable version.
