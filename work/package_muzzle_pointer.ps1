@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($HeartMuzzle) { $DynamicReticle = $true }
 if($DynamicReticle) { $ReticleDistance = $true }
 if($ReticleDistance) { $MenuRayAlignment = $true }
 if($MenuRayAlignment) { $InteractionDiagnostic = $true }
@@ -41,6 +42,7 @@ foreach($extension in @('uasset','uexp')) {
         $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v11_P.pak'
         $payloadFolder = 'work\muzzle-pointer-v11'
     }
+    if($HeartMuzzle) { $payloadFolder = 'work\muzzle-pointer-v15' }
     $file = Join-Path $workspace "$payloadFolder\VRGG\Player\VRGG_Pawn.$extension"
     $lines += '"'+$file+'" "../../../GalGun2/Content/VRGG/Player/VRGG_Pawn.'+$extension+'"'
 }
@@ -76,6 +78,14 @@ if($ReticleDistance) {
     foreach($extension in @('uasset','uexp')) {
         $file = Join-Path $workspace "work/muzzle-pointer-$pointerVersion/VRGG/Actors/PointerComponent.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
+    }
+}
+if($HeartMuzzle) {
+    $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v15_P.pak'
+    foreach($extension in @('uasset','uexp')) {
+        $asset = 'Effect/Particles/Shooting/P_EkoroHearts'
+        $file = Join-Path $workspace "work/muzzle-pointer-v15/VRGG/$asset.$extension"
+        ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
 }
 & $unrealPak $output "-create=$response" '-compress'
