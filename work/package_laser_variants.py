@@ -6,7 +6,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
-args=argparse.ArgumentParser();args.add_argument('--version',type=int,choices=(21,22),default=22);args=args.parse_args()
+args=argparse.ArgumentParser();args.add_argument('--version',type=int,choices=(21,22,23),default=23);args=args.parse_args()
 root = Path(__file__).resolve().parent.parent
 out = root/f'outputs/variants-v{args.version}'
 manifest = {}

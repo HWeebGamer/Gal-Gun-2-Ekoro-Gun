@@ -2,9 +2,10 @@
 import struct,json,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args=args.parse_args()
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args.add_argument('--visible',action='store_true');args=args.parse_args()
+if args.visible:args.aligned=True
 if args.aligned:args.always_on=True
-version='v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
+version='v23' if args.visible else 'v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
 toggle_key='F8' if args.bridge else 'MotionController_Right_FaceButton1'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'work/muzzle-pointer-v14/VRGG/Actors/PointerComponent.uasset')
@@ -14,6 +15,8 @@ owner=p.ref('PointerComponent_C')
 beam=p.add_property('EkoroLaserBeam','DynamicMaterial',owner,psc)
 enabled=p.add_property('EkoroLaserEnabled','CallFunc_IsValid_ReturnValue',owner)
 def imp(owner,fn):return p.add(fn,'Function',p.ref(owner))
+if args.visible:
+ for fn in ('IsActive','Activate'):imp('/Script/Engine.ActorComponent',fn)
 for cls,functions in {
  '/Script/Engine.GameplayStatics':['SpawnEmitterAtLocation','GetPlayerController'],
  '/Script/Engine.SceneComponent':['GetUpVector','SetVisibility'],
@@ -42,7 +45,7 @@ delta=math('Subtract_VectorVector',prop('HitLocation'),source)
 mid=math('Multiply_VectorFloat',math('Add_VectorVector',source,prop('HitLocation')),fl(.5))
 direction_local=local('CallFunc_Subtract_VectorVector_ReturnValue')
 rotation=math('MakeRotFromZ',direction_local if args.aligned else delta)
-scale=math('MakeVector',fl(.001),fl(.001),math('Divide_FloatFloat',math('VSize',delta),fl(100)))
+scale=math('MakeVector',fl(.003 if args.visible else .001),fl(.003 if args.visible else .001),math('Divide_FloatFloat',math('VSize',delta),fl(100)))
 transform=math('MakeTransform',mid,rotation,scale)
 target=p.index('ExecuteUbergraph_PointerComponent');raw=p.body(target);loc=20+4*struct.unpack_from('<i',raw,16)[0];oldvm,sz=struct.unpack_from('<ii',raw,loc)
 old=raw[loc+8:loc+8+sz];d,nodes=p.parse(old)
@@ -74,6 +77,11 @@ label('spawn')
 spawn=external('SpawnEmitterAtLocation',b'\x17'+b'\x20'+struct.pack('<i',laser)+source+b'\x22'+struct.pack('<3f',0,0,0)+vector(0,0,0)+b'\x28',beam)
 emit(b'\x5f'+prop('EkoroLaserBeam')+spawn)
 label('update');jump('return',valid(prop('EkoroLaserBeam')))
+if args.visible:
+ active=context(prop('EkoroLaserBeam'),native('/Script/Engine.ActorComponent.IsActive'),p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_IsValid_ReturnValue'))
+ jump('reactivate',active);jump('transform')
+ label('reactivate');emit(context(prop('EkoroLaserBeam'),native('/Script/Engine.ActorComponent.Activate',b'\x27')))
+ label('transform')
 if args.aligned:
  emit(b'\x0f'+struct.pack('<i',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_Subtract_VectorVector_ReturnValue'))+direction_local+delta)
 if args.always_on:
@@ -95,5 +103,5 @@ def check(n):
 for n in nn:check(n)
 p.changes[target]=raw[:loc]+struct.pack('<ii',vm,len(program))+program+raw[loc+8+sz:]
 p.save(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent')
-report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':None if args.always_on else toggle_key,'quest_button':None if args.always_on else 'Right A','default_enabled':args.always_on,'always_on':args.always_on,'beam_diameter_cm':.1,'beam_alpha':.10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
+report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':None if args.always_on else toggle_key,'quest_button':None if args.always_on else 'Right A','default_enabled':args.always_on,'always_on':args.always_on,'beam_diameter_cm':.3 if args.visible else .1,'beam_alpha':.30 if args.visible else .10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
 (root/f'outputs/Laser_{version}_build.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

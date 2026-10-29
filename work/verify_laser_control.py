@@ -2,9 +2,10 @@
 import struct,json,itertools,math,ast,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args=args.parse_args()
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args.add_argument('--visible',action='store_true');args=args.parse_args()
+if args.visible:args.aligned=True
 if args.aligned:args.always_on=True
-version='v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
+version='v23' if args.visible else 'v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
 root=Path(__file__).resolve().parent.parent
 p=Package(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent.uasset')
 report=json.loads((root/f'outputs/Laser_{version}_build.json').read_text())
@@ -22,7 +23,7 @@ if args.always_on:
     assert call[3][0][2].endswith('.CallFunc_MakeTransform_ReturnValue')
   for child in n[3]:verify_stored_transform(child)
  for n in nodes:verify_stored_transform(n)
-def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0)):
+def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0),beam_active=True):
  state={'EkoroLaserBeam':'beam' if exists else None,'EkoroLaserEnabled':on,'DynamicMaterial':None,'HitLocation':target,'IsUsingDualMotionControllers':dual,'IsCameraControlAndReticleEnabled':cam,'ForceHideAimReticle':hidden};events=[];locals={}
  def ev(n):
   _,op,detail,cs=n;name=detail.split('.')[-1]
@@ -42,6 +43,8 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0)):
    dst=state if cs[0][1]=='Instance' else locals;dst[cs[0][2].split('.')[-1]]=ev(cs[1]);return
   if op in ('Math','Call'):
    args=[ev(c) for c in cs[:-1]]
+   if name=='IsActive':return beam_active if exists else True
+   if name=='Activate':events.append(('activate',args));return
    if name=='IsValid':return args[0] is not None
    if name=='GetOwner':return 'pawn'
    if name=='GetPlayerController':return 'controller'
@@ -76,6 +79,7 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0)):
  expected=on if args.always_on else ((not on if pressed else on) if active else on)
  assert state['EkoroLaserEnabled']==expected
  show=active and (args.always_on or expected)
+ assert len([e for e in events if e[0]=='activate'])==int(args.visible and show and exists and not beam_active)
  spawns=[e for e in events if e[0]=='spawn'];assert len(spawns)==int(show and not exists)
  visibility=[e[1] for e in events if e[0]=='visible']
  assert visibility==([show] if exists or show else [])
@@ -90,6 +94,8 @@ for case in itertools.product((False,True),repeat=6):run(*case)
 for target in ((10,0,0),(0,5000,200),(-100,25,50)):run(True,True,False,False,True,False,target)
 for origin in ((1200,-800,170),(-3000,500,80)):
  run(True,True,False,False,False,False,tuple(a+b for a,b in zip(origin,(500,30,70))),origin)
+if args.visible:
+ for case in itertools.product((False,True),repeat=6):run(*case,beam_active=False)
 # New fields must belong to the component class and be linked as reflected children.
 cls=p.body(p.index('PointerComponent_C'));base=list(p.tags(cls))[-1][-1]+8;count=struct.unpack_from('<i',cls,base+8)[0]
 children=struct.unpack_from('<'+'i'*count,cls,base+12)

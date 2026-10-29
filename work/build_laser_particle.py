@@ -1,7 +1,9 @@
 """v18: faint, constant pink CPU mesh beam using game-native shaders."""
-import struct
+import struct,argparse
 from pathlib import Path
 from cooked_patch import Package
+args=argparse.ArgumentParser();args.add_argument('--visible',action='store_true');args=args.parse_args()
+version='v23' if args.visible else 'v18'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'UmodelSaved/Game/VRGG/Effect/Particles/Shooting/P_EcstasyShot.uasset')
 def edit(name,path,fn):
@@ -21,7 +23,7 @@ edit('P_EcstasyShot',['Emitters'],lambda _:array([p.index('ParticleSpriteEmitter
 edit('ParticleLODLevel_0',['Modules'],lambda _:array([p.index(s)+1 for s in ('ParticleModuleLifetime_0','ParticleModuleSize_0','ParticleModuleColorOverLife_0')]))
 constant('ParticleModuleLifetime_0','Lifetime',0) # UE particles with zero inverse lifetime do not age.
 constant('ParticleModuleSize_0','StartSize',1,True)
-constant('ParticleModuleColorOverLife_0','AlphaOverLife',.10)
+constant('ParticleModuleColorOverLife_0','AlphaOverLife',.30 if args.visible else .10)
 # Constant soft pink; no bright pulse or color cycling.
 edit('ParticleModuleColorOverLife_0',['ColorOverLife','Table','Values'],lambda raw:struct.pack('<i6f',6,1,.08,.35,1,.08,.35))
 boolean('P_EcstasyShot','bUseFixedRelativeBoundingBox',False)
@@ -37,5 +39,5 @@ for field in ('Count','CountLow'):
 p.changes[i]=p.edit(body,['BurstList'],lambda _:burst[:53]+part)
 p.names[p.names.index('/Game/VRGG/Effect/Particles/Shooting/P_EcstasyShot')]='/Game/VRGG/Effect/Particles/Shooting/P_EkoroLaser'
 p.names[p.names.index('P_EcstasyShot')]='P_EkoroLaser'
-p.save(root/'work/muzzle-pointer-v18/VRGG/Effect/Particles/Shooting/P_EkoroLaser')
-print('Laser particle built: one CPU cylinder, pink, alpha 0.10, no pulse.')
+p.save(root/f'work/muzzle-pointer-{version}/VRGG/Effect/Particles/Shooting/P_EkoroLaser')
+print(f'Laser particle built: {version}, alpha {0.30 if args.visible else 0.10}')
