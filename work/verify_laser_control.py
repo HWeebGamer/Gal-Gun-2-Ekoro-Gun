@@ -1,10 +1,12 @@
 """Evaluate emitted laser state control and convergent transforms without Unreal."""
-import struct,json,itertools,math,ast
+import struct,json,itertools,math,ast,argparse
 from pathlib import Path
 from cooked_patch import Package
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args=args.parse_args()
+version='v20' if args.bridge else 'v18'
 root=Path(__file__).resolve().parent.parent
-p=Package(root/'work/muzzle-pointer-v18/VRGG/Actors/PointerComponent.uasset')
-report=json.loads((root/'outputs/Laser_v18_build.json').read_text())
+p=Package(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent.uasset')
+report=json.loads((root/f'outputs/Laser_{version}_build.json').read_text())
 raw=p.body(p.index('ExecuteUbergraph_PointerComponent'));loc=20+4*struct.unpack_from('<i',raw,16)[0];vm,sz=struct.unpack_from('<ii',raw,loc)
 d,nodes=p.parse(raw[loc+8:loc+8+sz]);starts={d.spans[n[0]][1]:i for i,n in enumerate(nodes)}
 def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
@@ -30,7 +32,7 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
    if name=='IsValid':return args[0] is not None
    if name=='GetOwner':return 'pawn'
    if name=='GetPlayerController':return 'controller'
-   if name=='WasInputKeyJustPressed':assert args==['MotionController_Right_FaceButton1'];return pressed
+   if name=='WasInputKeyJustPressed':assert args==[report['key']];return pressed
    if name=='Not_PreBool':return not args[0]
    if name=='K2_GetComponentLocation':return (0,0,0)
    if name=='GetUpVector':return (0,0,1)

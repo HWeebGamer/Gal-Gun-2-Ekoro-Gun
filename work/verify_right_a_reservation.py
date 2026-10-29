@@ -1,13 +1,16 @@
 """Check saved v19 bytecode branches and preservation of other exports."""
 import json
+import argparse
 import struct
 from pathlib import Path
 from cooked_patch import Package
 
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args=args.parse_args()
+version='v20' if args.bridge else 'v19'
 root = Path(__file__).resolve().parent.parent
 old = Package(root.parent/'UmodelSaved/Game/VRGG/Player/Utils/PlayerInputFunctionLibrary.uasset')
-p = Package(root/'work/muzzle-pointer-v19/VRGG/Player/Utils/PlayerInputFunctionLibrary.uasset')
-report = json.loads((root/'outputs/RightA_v19_build.json').read_text())
+p = Package(root/f'work/muzzle-pointer-{version}/VRGG/Player/Utils/PlayerInputFunctionLibrary.uasset')
+report = json.loads((root/f'outputs/RightA_{version}_build.json').read_text())
 assert old.imports == p.imports
 assert len(old.exports) == len(p.exports)
 for i, export in enumerate(old.exports):
@@ -18,6 +21,7 @@ keys = ['MotionController_Right_FaceButton1', 'MotionController_Right_FaceButton
         'MotionController_Left_FaceButton1', 'MotionController_Left_FaceButton2',
         'MotionController_Right_Trigger', 'MotionController_Left_Trigger',
         'Gamepad_FaceButton_Bottom', 'Enter', 'Escape', 'None']
+if args.bridge: keys=['F8']+keys
 for fn, info in report.items():
     raw = p.body(p.index(fn))
     loc = 20 + 4 * struct.unpack_from('<i', raw, 16)[0]
@@ -56,4 +60,4 @@ for fn, info in report.items():
             pc = nextpc
         assert pc == info['resume_VM']
         assert additions == (key != keys[0]), (fn, key, additions)
-print('PASS: 20 emitted mapping paths; all other exports and imports unchanged.')
+print(f'PASS: {2*len(keys)} emitted mapping paths; all other exports and imports unchanged.')

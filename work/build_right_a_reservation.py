@@ -1,9 +1,13 @@
 """Reserve physical right A after the game's optional hand inversion (v19)."""
 import json
+import argparse
 import struct
 from pathlib import Path
 from cooked_patch import Package
 
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args=args.parse_args()
+version='v20' if args.bridge else 'v19'
+reserved_key='F8' if args.bridge else 'MotionController_Right_FaceButton1'
 root = Path(__file__).resolve().parent.parent
 source = root.parent / 'UmodelSaved/Game/VRGG/Player/Utils/PlayerInputFunctionLibrary.uasset'
 p = Package(source)
@@ -21,7 +25,7 @@ for fn in ('CreateActionKeyMapping', 'CreateAxisKeyMapping'):
     b, start, resume = d.spans[a]
     assert old[-1] == 0x53
     key = b'\x2f' + struct.pack('<ii', p.ref('/Script/InputCore.Key'), 32)
-    key += b'\x21' + p.name('MotionController_Right_FaceButton1') + b'\x30'
+    key += b'\x21' + p.name(reserved_key) + b'\x30'
     local = b'\x00' + struct.pack('<i', p.ref('PlayerInputFunctionLibrary_C.' + fn + '.l_Key'))
     equal = b'\x68' + struct.pack('<i', p.ref('/Script/Engine.KismetInputLibrary.EqualEqual_KeyKey')) + local + key + b'\x16'
     # Equal -> skip original Array_Add; unequal -> run it, then return to loop.
@@ -44,7 +48,7 @@ for fn in ('CreateActionKeyMapping', 'CreateAxisKeyMapping'):
     p.changes[index] = raw[:loc] + struct.pack('<ii', vm, len(code)) + code + raw[loc+8+size:]
     reports[fn] = dict(tail_VM=tailvm, add_VM=addvm, resume_VM=resume, old_VM=oldvm, new_VM=vm)
 
-output = root / 'work/muzzle-pointer-v19/VRGG/Player/Utils/PlayerInputFunctionLibrary'
+output = root / f'work/muzzle-pointer-{version}/VRGG/Player/Utils/PlayerInputFunctionLibrary'
 p.save(output)
-(root/'outputs/RightA_v19_build.json').write_text(json.dumps(reports, indent=2))
+(root/f'outputs/RightA_{version}_build.json').write_text(json.dumps(reports, indent=2))
 print(json.dumps(reports, indent=2))

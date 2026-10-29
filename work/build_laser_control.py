@@ -1,7 +1,10 @@
 """v18: persistent, default-off converging laser; right Quest A toggles it."""
-import struct,json
+import struct,json,argparse
 from pathlib import Path
 from cooked_patch import Package
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args=args.parse_args()
+version='v20' if args.bridge else 'v18'
+toggle_key='F8' if args.bridge else 'MotionController_Right_FaceButton1'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'work/muzzle-pointer-v14/VRGG/Actors/PointerComponent.uasset')
 engine=p.add('/Script/Engine','Package')
@@ -58,7 +61,7 @@ emit(old[a:b])
 jump('hide',valid(ownerexpr));jump('hide',flag('IsUsingDualMotionControllers'))
 jump('hide',flag('IsCameraControlAndReticleEnabled'));jump('hide',math('Not_PreBool',flag('ForceHideAimReticle')))
 controller=external('GetPlayerController',b'\x17\x25',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_GetOwner_ReturnValue'))
-key=b'\x2f'+struct.pack('<ii',keytype,32)+b'\x21'+p.name('MotionController_Right_FaceButton1')+b'\x30'
+key=b'\x2f'+struct.pack('<ii',keytype,32)+b'\x21'+p.name(toggle_key)+b'\x30'
 pressed=context(controller,native('/Script/Engine.PlayerController.WasInputKeyJustPressed',key),p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_IsValid_ReturnValue'))
 jump('after_toggle',pressed)
 emit(b'\x14'+prop('EkoroLaserEnabled')+math('Not_PreBool',prop('EkoroLaserEnabled')))
@@ -82,6 +85,6 @@ def check(n):
  for c in n[3]:check(c)
 for n in nn:check(n)
 p.changes[target]=raw[:loc]+struct.pack('<ii',vm,len(program))+program+raw[loc+8+sz:]
-p.save(root/'work/muzzle-pointer-v18/VRGG/Actors/PointerComponent')
-report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':'MotionController_Right_FaceButton1','quest_button':'Right A','default_enabled':False,'beam_diameter_cm':.1,'beam_alpha':.10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
-(root/'outputs/Laser_v18_build.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))
+p.save(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent')
+report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':toggle_key,'quest_button':'Right A','default_enabled':False,'beam_diameter_cm':.1,'beam_alpha':.10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
+(root/f'outputs/Laser_{version}_build.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))
