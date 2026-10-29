@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($LaserSight) { $BriefHearts = $true }
 if($BriefHearts) { $SubtleHearts = $true }
 if($SubtleHearts) { $HeartMuzzle = $true }
 if($HeartMuzzle) { $DynamicReticle = $true }
@@ -77,6 +78,7 @@ if($ReticleDistance) {
         $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v14_P.pak'
         $pointerVersion = 'v14'
     }
+    if($LaserSight) { $pointerVersion = 'v18' }
     foreach($extension in @('uasset','uexp')) {
         $file = Join-Path $workspace "work/muzzle-pointer-$pointerVersion/VRGG/Actors/PointerComponent.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
@@ -96,6 +98,14 @@ if($HeartMuzzle) {
     foreach($extension in @('uasset','uexp')) {
         $asset = 'Effect/Particles/Shooting/P_EkoroHearts'
         $file = Join-Path $workspace "work/muzzle-pointer-$heartVersion/VRGG/$asset.$extension"
+        ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
+    }
+}
+if($LaserSight) {
+    $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v18_P.pak'
+    foreach($extension in @('uasset','uexp')) {
+        $asset = 'Effect/Particles/Shooting/P_EkoroLaser'
+        $file = Join-Path $workspace "work/muzzle-pointer-v18/VRGG/$asset.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
 }

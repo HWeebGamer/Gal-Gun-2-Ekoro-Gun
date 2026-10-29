@@ -26,6 +26,35 @@ class Package:
    if self.ns['reference'](i)==full:return i
   self.added.extend(self.name(package)+self.name(kind)+struct.pack('<i',outer)+self.name(s));self.imports.append((s,outer));return -len(self.imports)
  def index(self,name):return next(i for i,e in enumerate(self.exports) if e['name']==name)
+ def add_property(self,name,template,owner,object_class=None):
+  """Append a reflected Blueprint field without renumbering existing exports."""
+  n=self.ns;ti=self.index(template);original=self.exports[ti];body=bytearray(self.body(ti))
+  assert len(body) in (34,36), 'Only simple bool/object property templates supported'
+  # UProperty ArrayDim followed by flags: transient, non-replicated state.
+  struct.pack_into('<Q',body,16,0x2000)
+  if object_class is not None:struct.pack_into('<i',body,len(body)-4,object_class)
+  data=bytearray(n['data']);old_count=len(self.exports)
+  records=data[n['export_offset']:n['export_offset']+104*old_count]
+  rec=bytearray(records[104*ti:104*(ti+1)])
+  struct.pack_into('<i',rec,12,owner);rec[16:24]=self.name(name)
+  struct.pack_into('<qq',rec,28,0,n['header_size']+len(n['payload'])-4)
+  struct.pack_into('<5i',rec,84,-1,0,0,0,0)
+  newoffset=len(data);data.extend(records+rec)
+  summary=24+struct.unpack_from('<i',data,20)[0]*20
+  length=struct.unpack_from('<i',data,summary+4)[0];fields=summary+8+abs(length)*(2 if length<0 else 1)+4
+  struct.pack_into('<ii',data,fields+16,old_count+1,newoffset)
+  # DependsMap contains one variable-length index array per export.
+  dep=struct.unpack_from('<i',data,fields+32)[0];end=dep
+  for _ in range(old_count):end+=4+4*struct.unpack_from('<i',data,end)[0]
+  newdep=len(data);data.extend(data[dep:end]+struct.pack('<i',0));struct.pack_into('<i',data,fields+32,newdep)
+  for i in range(struct.unpack_from('<i',data,fields+68)[0]):struct.pack_into('<i',data,fields+72+8*i,old_count+1)
+  n['data']=bytes(data);n['export_offset']=newoffset
+  e=dict(original);e.update(name=name,outer=owner,size=0,offset=n['header_size']+len(n['payload'])-4)
+  self.exports.append(e);self.changes[old_count]=bytes(body)
+  ci=owner-1;cls=self.body(ci);tags=list(self.tags(cls));base=tags[-1][-1]+8 if tags else 8
+  count=struct.unpack_from('<i',cls,base+8)[0];tail=base+12+4*count
+  self.changes[ci]=cls[:base+8]+struct.pack('<i',count+1)+cls[base+12:tail]+struct.pack('<i',old_count+1)+cls[tail:]
+  return old_count+1
  def body(self,i):
   e=self.exports[i];p=e['offset']-self.ns['header_size'];return self.changes.get(i,self.ns['payload'][p:p+e['size']])
  def parse(self,code):
