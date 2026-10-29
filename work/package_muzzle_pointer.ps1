@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($RightALaser) { $LaserSight = $true }
 if($LaserSight) { $BriefHearts = $true }
 if($BriefHearts) { $SubtleHearts = $true }
 if($SubtleHearts) { $HeartMuzzle = $true }
@@ -106,6 +107,14 @@ if($LaserSight) {
     foreach($extension in @('uasset','uexp')) {
         $asset = 'Effect/Particles/Shooting/P_EkoroLaser'
         $file = Join-Path $workspace "work/muzzle-pointer-v18/VRGG/$asset.$extension"
+        ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
+    }
+}
+if($RightALaser) {
+    $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v19_P.pak'
+    foreach($extension in @('uasset','uexp')) {
+        $asset = 'Player/Utils/PlayerInputFunctionLibrary'
+        $file = Join-Path $workspace "work/muzzle-pointer-v19/VRGG/$asset.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
 }
