@@ -2,8 +2,9 @@
 import struct,json,itertools,math,ast,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args=args.parse_args()
-version='v21' if args.always_on else ('v20' if args.bridge else 'v18')
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args=args.parse_args()
+if args.aligned:args.always_on=True
+version='v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
 root=Path(__file__).resolve().parent.parent
 p=Package(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent.uasset')
 report=json.loads((root/f'outputs/Laser_{version}_build.json').read_text())
@@ -12,6 +13,8 @@ d,nodes=p.parse(raw[loc+8:loc+8+sz]);starts={d.spans[n[0]][1]:i for i,n in enume
 if args.always_on:
  def verify_stored_transform(n):
   assert not (n[1] in ('Call','Math') and n[2].endswith('.WasInputKeyJustPressed'))
+  if args.aligned and n[1]=='Math' and n[2].endswith('.MakeRotFromZ'):
+   assert n[3][0][1]=='Local' and n[3][0][2].endswith('.CallFunc_Subtract_VectorVector_ReturnValue')
   if n[1]=='Context' and n[3][0][2]=='PointerComponent_C.EkoroLaserBeam':
    call=n[3][-1]
    if call[2].endswith('.K2_SetWorldTransform'):
@@ -19,7 +22,7 @@ if args.always_on:
     assert call[3][0][2].endswith('.CallFunc_MakeTransform_ReturnValue')
   for child in n[3]:verify_stored_transform(child)
  for n in nodes:verify_stored_transform(n)
-def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
+def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0)):
  state={'EkoroLaserBeam':'beam' if exists else None,'EkoroLaserEnabled':on,'DynamicMaterial':None,'HitLocation':target,'IsUsingDualMotionControllers':dual,'IsCameraControlAndReticleEnabled':cam,'ForceHideAimReticle':hidden};events=[];locals={}
  def ev(n):
   _,op,detail,cs=n;name=detail.split('.')[-1]
@@ -44,7 +47,7 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
    if name=='GetPlayerController':return 'controller'
    if name=='WasInputKeyJustPressed':assert args==[report['key']];return pressed
    if name=='Not_PreBool':return not args[0]
-   if name=='K2_GetComponentLocation':return (0,0,0)
+   if name=='K2_GetComponentLocation':return origin
    if name=='GetUpVector':return (0,0,1)
    if name=='GetForwardVector':return (1,0,0)
    if name=='Add_VectorVector':return tuple(a+b for a,b in zip(*args))
@@ -78,13 +81,15 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
  assert visibility==([show] if exists or show else [])
  transforms=[e[1] for e in events if e[0]=='transform'];assert len(transforms)==int(show)
  if show:
-  center,axis,scale=transforms[0];source=(.15,0,-2.248535)
+  center,axis,scale=transforms[0];source=tuple(a+b for a,b in zip(origin,(.15,0,-2.248535)))
   first=tuple(c-a*scale[2]*50 for c,a in zip(center,axis));last=tuple(c+a*scale[2]*50 for c,a in zip(center,axis))
   assert all(abs(a-b)<1e-4 for a,b in zip(first,source))
   assert all(abs(a-b)<1e-4 for a,b in zip(last,target))
  return state,events
 for case in itertools.product((False,True),repeat=6):run(*case)
 for target in ((10,0,0),(0,5000,200),(-100,25,50)):run(True,True,False,False,True,False,target)
+for origin in ((1200,-800,170),(-3000,500,80)):
+ run(True,True,False,False,False,False,tuple(a+b for a,b in zip(origin,(500,30,70))),origin)
 # New fields must belong to the component class and be linked as reflected children.
 cls=p.body(p.index('PointerComponent_C'));base=list(p.tags(cls))[-1][-1]+8;count=struct.unpack_from('<i',cls,base+8)[0]
 children=struct.unpack_from('<'+'i'*count,cls,base+12)

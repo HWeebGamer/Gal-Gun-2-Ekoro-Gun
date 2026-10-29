@@ -2,8 +2,9 @@
 import struct,json,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args=args.parse_args()
-version='v21' if args.always_on else ('v20' if args.bridge else 'v18')
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args=args.parse_args()
+if args.aligned:args.always_on=True
+version='v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
 toggle_key='F8' if args.bridge else 'MotionController_Right_FaceButton1'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'work/muzzle-pointer-v14/VRGG/Actors/PointerComponent.uasset')
@@ -39,7 +40,8 @@ def flag(name):
 source=math('Add_VectorVector',get('K2_GetComponentLocation'),math('Add_VectorVector',math('Multiply_VectorFloat',get('GetUpVector'),fl(-2.248535)),math('Multiply_VectorFloat',get('GetForwardVector'),fl(.15))))
 delta=math('Subtract_VectorVector',prop('HitLocation'),source)
 mid=math('Multiply_VectorFloat',math('Add_VectorVector',source,prop('HitLocation')),fl(.5))
-rotation=math('MakeRotFromZ',delta)
+direction_local=local('CallFunc_Subtract_VectorVector_ReturnValue')
+rotation=math('MakeRotFromZ',direction_local if args.aligned else delta)
 scale=math('MakeVector',fl(.001),fl(.001),math('Divide_FloatFloat',math('VSize',delta),fl(100)))
 transform=math('MakeTransform',mid,rotation,scale)
 target=p.index('ExecuteUbergraph_PointerComponent');raw=p.body(target);loc=20+4*struct.unpack_from('<i',raw,16)[0];oldvm,sz=struct.unpack_from('<ii',raw,loc)
@@ -72,6 +74,8 @@ label('spawn')
 spawn=external('SpawnEmitterAtLocation',b'\x17'+b'\x20'+struct.pack('<i',laser)+source+b'\x22'+struct.pack('<3f',0,0,0)+vector(0,0,0)+b'\x28',beam)
 emit(b'\x5f'+prop('EkoroLaserBeam')+spawn)
 label('update');jump('return',valid(prop('EkoroLaserBeam')))
+if args.aligned:
+ emit(b'\x0f'+struct.pack('<i',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_Subtract_VectorVector_ReturnValue'))+direction_local+delta)
 if args.always_on:
  transform_local=local('CallFunc_MakeTransform_ReturnValue')
  emit(b'\x0f'+struct.pack('<i',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_MakeTransform_ReturnValue'))+transform_local+transform)
