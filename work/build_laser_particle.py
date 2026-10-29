@@ -2,8 +2,9 @@
 import struct,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--visible',action='store_true');args=args.parse_args()
-version='v23' if args.visible else 'v18'
+args=argparse.ArgumentParser();args.add_argument('--visible',action='store_true');args.add_argument('--dot',action='store_true');args=args.parse_args()
+if args.dot:args.visible=True
+version='v24' if args.dot else 'v23' if args.visible else 'v18'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'UmodelSaved/Game/VRGG/Effect/Particles/Shooting/P_EcstasyShot.uasset')
 def edit(name,path,fn):
@@ -23,9 +24,9 @@ edit('P_EcstasyShot',['Emitters'],lambda _:array([p.index('ParticleSpriteEmitter
 edit('ParticleLODLevel_0',['Modules'],lambda _:array([p.index(s)+1 for s in ('ParticleModuleLifetime_0','ParticleModuleSize_0','ParticleModuleColorOverLife_0')]))
 constant('ParticleModuleLifetime_0','Lifetime',0) # UE particles with zero inverse lifetime do not age.
 constant('ParticleModuleSize_0','StartSize',1,True)
-constant('ParticleModuleColorOverLife_0','AlphaOverLife',.30 if args.visible else .10)
+constant('ParticleModuleColorOverLife_0','AlphaOverLife',.50 if args.dot else .30 if args.visible else .10)
 # Constant soft pink; no bright pulse or color cycling.
-edit('ParticleModuleColorOverLife_0',['ColorOverLife','Table','Values'],lambda raw:struct.pack('<i6f',6,1,.08,.35,1,.08,.35))
+edit('ParticleModuleColorOverLife_0',['ColorOverLife','Table','Values'],lambda raw:struct.pack('<i6f',6,*((1,.35,.65)*2 if args.dot else (1,.08,.35)*2)))
 boolean('P_EcstasyShot','bUseFixedRelativeBoundingBox',False)
 boolean('ParticleModuleTypeDataMesh_0','bCameraFacing',False)
 cylinder=p.add('Cylinder','StaticMesh',p.add('/Engine/BasicShapes/Cylinder','Package'),'/Script/Engine')
@@ -40,4 +41,12 @@ p.changes[i]=p.edit(body,['BurstList'],lambda _:burst[:53]+part)
 p.names[p.names.index('/Game/VRGG/Effect/Particles/Shooting/P_EcstasyShot')]='/Game/VRGG/Effect/Particles/Shooting/P_EkoroLaser'
 p.names[p.names.index('P_EcstasyShot')]='P_EkoroLaser'
 p.save(root/f'work/muzzle-pointer-{version}/VRGG/Effect/Particles/Shooting/P_EkoroLaser')
-print(f'Laser particle built: {version}, alpha {0.30 if args.visible else 0.10}')
+print(f'Laser particle built: {version}, alpha {0.50 if args.dot else 0.30 if args.visible else 0.10}')
+
+if args.dot:
+ constant('ParticleModuleColorOverLife_0','AlphaOverLife',.85)
+ edit('ParticleModuleColorOverLife_0',['ColorOverLife','Table','Values'],lambda raw:struct.pack('<i6f',6,1,.08,.4,1,.08,.4))
+ p.names[p.names.index('/Game/VRGG/Effect/Particles/Shooting/P_EkoroLaser')]='/Game/VRGG/Effect/Particles/Shooting/P_EkoroLaserDot'
+ p.names[p.names.index('P_EkoroLaser')]='P_EkoroLaserDot'
+ p.save(root/f'work/muzzle-pointer-{version}/VRGG/Effect/Particles/Shooting/P_EkoroLaserDot')
+ print('v24 beam alpha .50, light pink; separate concentrated pink dot alpha .85')

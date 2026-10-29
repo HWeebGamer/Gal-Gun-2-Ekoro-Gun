@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[switch]$AlignedLaser,[switch]$VisibleLaser,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[switch]$AlignedLaser,[switch]$VisibleLaser,[switch]$LaserDot,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($LaserDot) { $VisibleLaser = $true }
 if($VisibleLaser) { $AlignedLaser = $true }
 if($AlignedLaser) { $AlwaysLaser = $true }
 if($AlwaysLaser) { $LaserSight = $true; $LaserBridge = $false; $RightALaser = $false }
@@ -88,6 +89,7 @@ if($ReticleDistance) {
     if($AlwaysLaser) { $pointerVersion = 'v21' }
     if($AlignedLaser) { $pointerVersion = 'v22' }
     if($VisibleLaser) { $pointerVersion = 'v23' }
+    if($LaserDot) { $pointerVersion = 'v24' }
     foreach($extension in @('uasset','uexp')) {
         $file = Join-Path $workspace "work/muzzle-pointer-$pointerVersion/VRGG/Actors/PointerComponent.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
@@ -114,7 +116,7 @@ if($LaserSight) {
     $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v18_P.pak'
     foreach($extension in @('uasset','uexp')) {
         $asset = 'Effect/Particles/Shooting/P_EkoroLaser'
-        $laserVersion = if($VisibleLaser) {'v23'} else {'v18'}
+        $laserVersion = if($LaserDot) {'v24'} elseif($VisibleLaser) {'v23'} else {'v18'}
         $file = Join-Path $workspace "work/muzzle-pointer-$laserVersion/VRGG/$asset.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
@@ -132,6 +134,14 @@ if($LaserBridge) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v2
 if($AlwaysLaser) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v21_P.pak' }
 if($AlignedLaser) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v22_P.pak' }
 if($VisibleLaser) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v23_P.pak' }
+if($LaserDot) {
+    $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v24_P.pak'
+    foreach($extension in @('uasset','uexp')) {
+        $asset = 'Effect/Particles/Shooting/P_EkoroLaserDot'
+        $file = Join-Path $workspace "work/muzzle-pointer-v24/VRGG/$asset.$extension"
+        ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
+    }
+}
 & $unrealPak $output "-create=$response" '-compress'
 if ($LASTEXITCODE -ne 0) { throw 'Package creation failed' }
 & $unrealPak $output '-test'

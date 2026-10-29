@@ -1,0 +1,9 @@
+# v24: lighter beam and concentrated center marker
+
+The user confirmed v23 is visible and requested 50% opacity, lighter pink, and a concentrated pink circle behind the crosshair center. Center convergence is retained so the beam endpoint matches the aiming point.
+
+The beam keeps its 3 mm diameter. Particle color changes from linear RGB (1,.08,.35) to (1,.35,.65), and alpha changes from .30 to .50. A separate particle component uses a flattened cylinder to form the pink circle: alpha .85, color (1,.08,.4), diameter 12% of the crosshair's uniform world scale times the 100 cm primitive diameter, and thickness .01 cm. Its center is .1 cm beyond HitLocation along the pointer's forward axis, placing the marker behind the crosshair plane. This is an aiming marker, not a surface decal. Final appearance depends on the existing translucent material and needs headset confirmation.
+
+The dot uses a new transient component reference, is spawned once, reused, reactivated if inactive, and hidden under the same gameplay gates as the beam. Its stored direction and transform locals follow the v21/v22 native-reference fixes. The dot follows the crosshair's existing distance/target scaling. No controller binding, helper, texture cook, or no-laser payload change.
+
+Build control/particle scripts and run verify_laser_control.py with --dot. Package using package_muzzle_pointer.ps1 -LaserDot and package_laser_variants.py --version 24. The evaluator covers 192 state combinations including independent missing dot/beam references, inactive recovery, visibility, local-reference safety, dot position/scale and beam endpoint convergence. All 23 archive entries validated. Installed with checksum-verified v23 backup under G:\GalGun2-ModWork\backups\prototype-v23. Standalone ZIPs are under outputs/variants-v24. Not published.
