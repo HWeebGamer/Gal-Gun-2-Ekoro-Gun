@@ -2,13 +2,23 @@
 import struct,json,itertools,math,ast,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args=args.parse_args()
-version='v20' if args.bridge else 'v18'
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args=args.parse_args()
+version='v21' if args.always_on else ('v20' if args.bridge else 'v18')
 root=Path(__file__).resolve().parent.parent
 p=Package(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent.uasset')
 report=json.loads((root/f'outputs/Laser_{version}_build.json').read_text())
 raw=p.body(p.index('ExecuteUbergraph_PointerComponent'));loc=20+4*struct.unpack_from('<i',raw,16)[0];vm,sz=struct.unpack_from('<ii',raw,loc)
 d,nodes=p.parse(raw[loc+8:loc+8+sz]);starts={d.spans[n[0]][1]:i for i,n in enumerate(nodes)}
+if args.always_on:
+ def verify_stored_transform(n):
+  assert not (n[1] in ('Call','Math') and n[2].endswith('.WasInputKeyJustPressed'))
+  if n[1]=='Context' and n[3][0][2]=='PointerComponent_C.EkoroLaserBeam':
+   call=n[3][-1]
+   if call[2].endswith('.K2_SetWorldTransform'):
+    assert call[3][0][1]=='Local'
+    assert call[3][0][2].endswith('.CallFunc_MakeTransform_ReturnValue')
+  for child in n[3]:verify_stored_transform(child)
+ for n in nodes:verify_stored_transform(n)
 def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
  state={'EkoroLaserBeam':'beam' if exists else None,'EkoroLaserEnabled':on,'DynamicMaterial':None,'HitLocation':target,'IsUsingDualMotionControllers':dual,'IsCameraControlAndReticleEnabled':cam,'ForceHideAimReticle':hidden};events=[];locals={}
  def ev(n):
@@ -25,7 +35,7 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
   if op in ('True','False'):return op=='True'
   if op=='Cast':return 'pawn'
   if op=='Context':return ev(cs[-1]) if ev(cs[0]) is not None else None
-  if op in ('LetBool','LetObj'):
+  if op in ('Let','LetBool','LetObj'):
    dst=state if cs[0][1]=='Instance' else locals;dst[cs[0][2].split('.')[-1]]=ev(cs[1]);return
   if op in ('Math','Call'):
    args=[ev(c) for c in cs[:-1]]
@@ -60,9 +70,9 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70)):
   else:ev(n);pc+=1
  else:raise AssertionError('Laser tail failed to return')
  active=dual and cam and not hidden
- expected=(not on if pressed else on) if active else on
+ expected=on if args.always_on else ((not on if pressed else on) if active else on)
  assert state['EkoroLaserEnabled']==expected
- show=active and expected
+ show=active and (args.always_on or expected)
  spawns=[e for e in events if e[0]=='spawn'];assert len(spawns)==int(show and not exists)
  visibility=[e[1] for e in events if e[0]=='visible']
  assert visibility==([show] if exists or show else [])

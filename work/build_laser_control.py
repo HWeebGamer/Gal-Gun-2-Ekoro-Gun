@@ -2,8 +2,8 @@
 import struct,json,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args=args.parse_args()
-version='v20' if args.bridge else 'v18'
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args=args.parse_args()
+version='v21' if args.always_on else ('v20' if args.bridge else 'v18')
 toggle_key='F8' if args.bridge else 'MotionController_Right_FaceButton1'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'work/muzzle-pointer-v14/VRGG/Actors/PointerComponent.uasset')
@@ -60,17 +60,22 @@ def visible(value):return context(prop('EkoroLaserBeam'),native('/Script/Engine.
 emit(old[a:b])
 jump('hide',valid(ownerexpr));jump('hide',flag('IsUsingDualMotionControllers'))
 jump('hide',flag('IsCameraControlAndReticleEnabled'));jump('hide',math('Not_PreBool',flag('ForceHideAimReticle')))
-controller=external('GetPlayerController',b'\x17\x25',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_GetOwner_ReturnValue'))
-key=b'\x2f'+struct.pack('<ii',keytype,32)+b'\x21'+p.name(toggle_key)+b'\x30'
-pressed=context(controller,native('/Script/Engine.PlayerController.WasInputKeyJustPressed',key),p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_IsValid_ReturnValue'))
-jump('after_toggle',pressed)
-emit(b'\x14'+prop('EkoroLaserEnabled')+math('Not_PreBool',prop('EkoroLaserEnabled')))
-label('after_toggle');jump('hide',prop('EkoroLaserEnabled'))
+if not args.always_on:
+ controller=external('GetPlayerController',b'\x17\x25',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_GetOwner_ReturnValue'))
+ key=b'\x2f'+struct.pack('<ii',keytype,32)+b'\x21'+p.name(toggle_key)+b'\x30'
+ pressed=context(controller,native('/Script/Engine.PlayerController.WasInputKeyJustPressed',key),p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_IsValid_ReturnValue'))
+ jump('after_toggle',pressed)
+ emit(b'\x14'+prop('EkoroLaserEnabled')+math('Not_PreBool',prop('EkoroLaserEnabled')))
+ label('after_toggle');jump('hide',prop('EkoroLaserEnabled'))
 jump('spawn',valid(prop('EkoroLaserBeam')));jump('update')
 label('spawn')
 spawn=external('SpawnEmitterAtLocation',b'\x17'+b'\x20'+struct.pack('<i',laser)+source+b'\x22'+struct.pack('<3f',0,0,0)+vector(0,0,0)+b'\x28',beam)
 emit(b'\x5f'+prop('EkoroLaserBeam')+spawn)
 label('update');jump('return',valid(prop('EkoroLaserBeam')))
+if args.always_on:
+ transform_local=local('CallFunc_MakeTransform_ReturnValue')
+ emit(b'\x0f'+struct.pack('<i',p.ref('PointerComponent_C.ExecuteUbergraph_PointerComponent.CallFunc_MakeTransform_ReturnValue'))+transform_local+transform)
+ transform=transform_local
 emit(context(prop('EkoroLaserBeam'),native('/Script/Engine.SceneComponent.K2_SetWorldTransform',transform+b'\x28'+local('CallFunc_K2_SetWorldTransform_SweepHitResult')+b'\x27')))
 emit(visible(True));jump('return')
 label('hide');jump('return',valid(prop('EkoroLaserBeam')));emit(visible(False))
@@ -86,5 +91,5 @@ def check(n):
 for n in nn:check(n)
 p.changes[target]=raw[:loc]+struct.pack('<ii',vm,len(program))+program+raw[loc+8+sz:]
 p.save(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent')
-report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':toggle_key,'quest_button':'Right A','default_enabled':False,'beam_diameter_cm':.1,'beam_alpha':.10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
+report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':None if args.always_on else toggle_key,'quest_button':None if args.always_on else 'Right A','default_enabled':args.always_on,'always_on':args.always_on,'beam_diameter_cm':.1,'beam_alpha':.10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
 (root/f'outputs/Laser_{version}_build.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($AlwaysLaser) { $LaserSight = $true; $LaserBridge = $false; $RightALaser = $false }
 if($LaserBridge) { $LaserSight = $true; $RightALaser = $false }
 if($RightALaser) { $LaserSight = $true }
 if($LaserSight) { $BriefHearts = $true }
@@ -82,6 +83,7 @@ if($ReticleDistance) {
     }
     if($LaserSight) { $pointerVersion = 'v18' }
     if($LaserBridge) { $pointerVersion = 'v20' }
+    if($AlwaysLaser) { $pointerVersion = 'v21' }
     foreach($extension in @('uasset','uexp')) {
         $file = Join-Path $workspace "work/muzzle-pointer-$pointerVersion/VRGG/Actors/PointerComponent.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
@@ -122,6 +124,7 @@ if($RightALaser -or $LaserBridge) {
     }
 }
 if($LaserBridge) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v20_P.pak' }
+if($AlwaysLaser) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v21_P.pak' }
 & $unrealPak $output "-create=$response" '-compress'
 if ($LASTEXITCODE -ne 0) { throw 'Package creation failed' }
 & $unrealPak $output '-test'
