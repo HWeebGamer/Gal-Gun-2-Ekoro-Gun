@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($BriefHearts) { $SubtleHearts = $true }
 if($SubtleHearts) { $HeartMuzzle = $true }
 if($HeartMuzzle) { $DynamicReticle = $true }
 if($DynamicReticle) { $ReticleDistance = $true }
@@ -87,6 +88,10 @@ if($HeartMuzzle) {
     if($SubtleHearts) {
         $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v16_P.pak'
         $heartVersion = 'v16'
+    }
+    if($BriefHearts) {
+        $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v17_P.pak'
+        $heartVersion = 'v17'
     }
     foreach($extension in @('uasset','uexp')) {
         $asset = 'Effect/Particles/Shooting/P_EkoroHearts'
