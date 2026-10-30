@@ -1,4 +1,4 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[switch]$AlignedLaser,[switch]$VisibleLaser,[switch]$LaserDot,[switch]$BoundedDot,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[switch]$AlignedLaser,[switch]$VisibleLaser,[switch]$LaserDot,[switch]$BoundedDot,[switch]$StoryChoices,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
 if($BoundedDot) { $LaserDot = $true }
 if($LaserDot) { $VisibleLaser = $true }
 if($VisibleLaser) { $AlignedLaser = $true }
@@ -53,6 +53,7 @@ foreach($extension in @('uasset','uexp')) {
         $payloadFolder = 'work\muzzle-pointer-v11'
     }
     if($HeartMuzzle) { $payloadFolder = 'work\muzzle-pointer-v15' }
+    if($StoryChoices) { $payloadFolder = 'work\muzzle-pointer-v26' }
     $file = Join-Path $workspace "$payloadFolder\VRGG\Player\VRGG_Pawn.$extension"
     $lines += '"'+$file+'" "../../../GalGun2/Content/VRGG/Player/VRGG_Pawn.'+$extension+'"'
 }
@@ -145,6 +146,14 @@ if($LaserDot) {
     }
 }
 if($BoundedDot) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v25_P.pak' }
+if($StoryChoices) {
+    $output = Join-Path $workspace $(if($LaserSight) {'outputs\EkoroMuzzlePointer_v26_P.pak'} else {'outputs\EkoroMuzzlePointer_v26_NoLaser_P.pak'})
+    foreach($extension in @('uasset','uexp')) {
+        $asset = 'Widgets/Demo/VRGG_TalkSelectActor'
+        $file = Join-Path $workspace "work/muzzle-pointer-v26/VRGG/$asset.$extension"
+        ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
+    }
+}
 & $unrealPak $output "-create=$response" '-compress'
 if ($LASTEXITCODE -ne 0) { throw 'Package creation failed' }
 & $unrealPak $output '-test'

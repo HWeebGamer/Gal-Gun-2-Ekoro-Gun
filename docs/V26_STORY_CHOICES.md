@@ -1,0 +1,13 @@
+# v26: story-choice cursor and hover selection
+
+The user confirmed v25's laser works. They reported that story choices lack a visible cursor and that hovering a right-side choice can still confirm the left choice. A friend encountered this in v14; the user has also encountered it, and reports it affects multi-choice story prompts.
+
+VRGG_TalkSelectActor.Talk Window Hovered receives the individual window widget and finds its array index, but requires Is Show Mouse Cursor before updating SelectingWindowIndex. The v10 shared widget hover fix did not cover this separate actor-level gate. The patch accepts an actual hover event here, retaining EnableCursorControl, enabled-option checks, object identity matching and the original selected-index/other-window deselection logic. Confirmation remains the game's native path, which reads SelectingWindowIndex. Disabled choices remain disabled. No global mouse-cursor flag is changed.
+
+The pawn's TickCursor receives a scoped visibility override only for dual motion controllers while ActiveWidgetActor casts to VRGG_TalkSelectActor. It makes the reticle component visible, clears its hidden flag, and sets an opaque white, non-hit-testable widget. Three transient booleans capture and restore the component's prior visibility/hidden state on leaving story choices. It does not enable shooting, change camera-control gates or alter ReticleStatus. The story actor already sets/clears ActiveWidgetActor during Start/Exit.
+
+Build with work/build_story_choices.py, verify with work/verify_story_choices.py. The verifier executes the actual emitted actor-hover bytecode across 240 two/three-choice cases, including disabled options, cursor-control disabled, and previous selections. It checks cursor entry/repeated frames/exit restoration and non-story/non-VR isolation. All other actor exports remain byte-identical. These checks do not establish runtime UMG appearance; a story-choice headset test is required.
+
+Both editions include the fix. Package laser using -BoundedDot -StoryChoices and the v18 attachment mesh; package no-laser using -BriefHearts -StoryChoices and the original mesh snapshot. Then run package_laser_variants.py --version 26. Archives validated 25 laser entries and 21 no-laser entries. The laser PointerComponent and particle payloads remain the confirmed v25 versions.
+
+Installed the laser edition locally with verified v25 backup under G:\GalGun2-ModWork\backups\prototype-v25. ZIPs are under outputs/variants-v26. Not published. Test a two/three-choice prompt: visible cursor, hover each choice, confirm the right option, move off a choice, and return to normal gameplay/menu cursor behavior. Check both desktop and VR controls before release.
