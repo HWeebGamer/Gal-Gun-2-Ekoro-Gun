@@ -2,11 +2,12 @@
 import struct,json,itertools,math,ast,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args.add_argument('--visible',action='store_true');args.add_argument('--dot',action='store_true');args=args.parse_args()
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args.add_argument('--visible',action='store_true');args.add_argument('--dot',action='store_true');args.add_argument('--bounded-dot',action='store_true');args=args.parse_args()
+if args.bounded_dot:args.dot=True
 if args.dot:args.visible=True
 if args.visible:args.aligned=True
 if args.aligned:args.always_on=True
-version='v24' if args.dot else 'v23' if args.visible else 'v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
+version='v25' if args.bounded_dot else 'v24' if args.dot else 'v23' if args.visible else 'v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
 root=Path(__file__).resolve().parent.parent
 p=Package(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent.uasset')
 report=json.loads((root/f'outputs/Laser_{version}_build.json').read_text())
@@ -24,9 +25,10 @@ if args.always_on:
     assert call[3][0][2].endswith('.CallFunc_MakeTransform_ReturnValue')
   for child in n[3]:verify_stored_transform(child)
  for n in nodes:verify_stored_transform(n)
-def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0),beam_active=True,dot_exists=None):
+def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0),beam_active=True,dot_exists=None,reticle_size=.05):
  state={'EkoroLaserBeam':'beam' if exists else None,'EkoroLaserEnabled':on,'DynamicMaterial':None,'HitLocation':target,'IsUsingDualMotionControllers':dual,'IsCameraControlAndReticleEnabled':cam,'ForceHideAimReticle':hidden};events=[];locals={}
  if dot_exists is None:dot_exists=exists
+ state['HitDistance']=math.sqrt(sum((a-b)**2 for a,b in zip(target,origin)))
  state.update(EkoroLaserDot='dot' if dot_exists else None,AimReticle='reticle')
  current_component=None
  def ev(n):
@@ -59,12 +61,13 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0),beam
    if name=='WasInputKeyJustPressed':assert args==[report['key']];return pressed
    if name=='Not_PreBool':return not args[0]
    if name=='K2_GetComponentLocation':return origin
-   if name=='K2_GetComponentScale':return (.05,.05,.05)
+   if name=='K2_GetComponentScale':return (reticle_size,)*3
    if name=='GetUpVector':return (0,0,1)
    if name=='GetForwardVector':return (1,0,0)
    if name=='Add_VectorVector':return tuple(a+b for a,b in zip(*args))
    if name=='Subtract_VectorVector':return tuple(a-b for a,b in zip(*args))
    if name=='Multiply_VectorFloat':return tuple(a*args[1] for a in args[0])
+   if name=='FClamp':return min(max(args[0],args[1]),args[2])
    if name=='Multiply_FloatFloat':return args[0]*args[1]
    if name=='Divide_FloatFloat':return args[0]/args[1]
    if name=='VSize':return math.sqrt(sum(a*a for a in args[0]))
@@ -110,7 +113,8 @@ def run(dual,cam,hidden,on,pressed,exists,target=(500,30,70),origin=(0,0,0),beam
    position,axis,scale=dots[0]
    assert all(abs(a-b)<1e-5 for a,b in zip(position,(target[0]+.1,target[1],target[2])))
    assert all(abs(a-b)<1e-5 for a,b in zip(axis,(1,0,0)))
-   assert all(abs(a-b)<1e-6 for a,b in zip(scale,(.006,.006,.0001)))
+   expected_scale=min(max(state['HitDistance']*.000012,.004),.015) if args.bounded_dot else .006
+   assert all(abs(a-b)<1e-6 for a,b in zip(scale,(expected_scale,expected_scale,.0001)))
  return state,events
 for case in itertools.product((False,True),repeat=6):run(*case)
 for target in ((10,0,0),(0,5000,200),(-100,25,50)):run(True,True,False,False,True,False,target)
@@ -120,6 +124,9 @@ if args.visible:
  for case in itertools.product((False,True),repeat=6):run(*case,beam_active=False)
 if args.dot:
  for case in itertools.product((False,True),repeat=6):run(*case,beam_active=False,dot_exists=not case[-1])
+if args.bounded_dot:
+ for distance in (1,50,500,1250,5000,100000):
+  for reticle_size in (.001,1,100,10000):run(True,True,False,False,False,False,target=(distance,0,0),reticle_size=reticle_size)
 # New fields must belong to the component class and be linked as reflected children.
 cls=p.body(p.index('PointerComponent_C'));base=list(p.tags(cls))[-1][-1]+8;count=struct.unpack_from('<i',cls,base+8)[0]
 children=struct.unpack_from('<'+'i'*count,cls,base+12)

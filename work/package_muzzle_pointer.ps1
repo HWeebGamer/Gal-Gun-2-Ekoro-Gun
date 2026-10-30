@@ -1,4 +1,5 @@
-param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[switch]$AlignedLaser,[switch]$VisibleLaser,[switch]$LaserDot,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+param([switch]$MenuVisibility,[switch]$MenuInteraction,[switch]$MenuRayFix,[switch]$NativeMenuConfirm,[switch]$RestoreMenuInitialization,[switch]$ScopedHover,[switch]$InteractionDiagnostic,[switch]$MenuRayAlignment,[switch]$ReticleDistance,[switch]$DynamicReticle,[switch]$HeartMuzzle,[switch]$SubtleHearts,[switch]$BriefHearts,[switch]$LaserSight,[switch]$RightALaser,[switch]$LaserBridge,[switch]$AlwaysLaser,[switch]$AlignedLaser,[switch]$VisibleLaser,[switch]$LaserDot,[switch]$BoundedDot,[Parameter(Mandatory=$true)][string]$CookedDirectory,[Parameter(Mandatory=$true)][string]$UnrealPak)
+if($BoundedDot) { $LaserDot = $true }
 if($LaserDot) { $VisibleLaser = $true }
 if($VisibleLaser) { $AlignedLaser = $true }
 if($AlignedLaser) { $AlwaysLaser = $true }
@@ -90,6 +91,7 @@ if($ReticleDistance) {
     if($AlignedLaser) { $pointerVersion = 'v22' }
     if($VisibleLaser) { $pointerVersion = 'v23' }
     if($LaserDot) { $pointerVersion = 'v24' }
+    if($BoundedDot) { $pointerVersion = 'v25' }
     foreach($extension in @('uasset','uexp')) {
         $file = Join-Path $workspace "work/muzzle-pointer-$pointerVersion/VRGG/Actors/PointerComponent.$extension"
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/Actors/PointerComponent.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
@@ -142,6 +144,7 @@ if($LaserDot) {
         ('"'+$file+'" "../../../GalGun2/Content/VRGG/'+$asset+'.'+$extension+'"') | Add-Content -LiteralPath $response -Encoding ASCII
     }
 }
+if($BoundedDot) { $output = Join-Path $workspace 'outputs\EkoroMuzzlePointer_v25_P.pak' }
 & $unrealPak $output "-create=$response" '-compress'
 if ($LASTEXITCODE -ne 0) { throw 'Package creation failed' }
 & $unrealPak $output '-test'

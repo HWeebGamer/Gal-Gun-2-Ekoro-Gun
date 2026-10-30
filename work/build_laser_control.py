@@ -2,11 +2,12 @@
 import struct,json,argparse
 from pathlib import Path
 from cooked_patch import Package
-args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args.add_argument('--visible',action='store_true');args.add_argument('--dot',action='store_true');args=args.parse_args()
+args=argparse.ArgumentParser();args.add_argument('--bridge',action='store_true');args.add_argument('--always-on',action='store_true');args.add_argument('--aligned',action='store_true');args.add_argument('--visible',action='store_true');args.add_argument('--dot',action='store_true');args.add_argument('--bounded-dot',action='store_true');args=args.parse_args()
+if args.bounded_dot:args.dot=True
 if args.dot:args.visible=True
 if args.visible:args.aligned=True
 if args.aligned:args.always_on=True
-version='v24' if args.dot else 'v23' if args.visible else 'v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
+version='v25' if args.bounded_dot else 'v24' if args.dot else 'v23' if args.visible else 'v22' if args.aligned else 'v21' if args.always_on else ('v20' if args.bridge else 'v18')
 toggle_key='F8' if args.bridge else 'MotionController_Right_FaceButton1'
 root=Path(__file__).resolve().parent.parent
 p=Package(root/'work/muzzle-pointer-v14/VRGG/Actors/PointerComponent.uasset')
@@ -99,6 +100,7 @@ if args.dot:
  dot_position=math('Add_VectorVector',prop('HitLocation'),math('Multiply_VectorFloat',get('GetForwardVector'),fl(.1)))
  reticle_scale=context(prop('AimReticle'),get('K2_GetComponentScale'))
  dot_radius_scale=math('Multiply_FloatFloat',math('VSize',reticle_scale),fl(.12/(3**.5)))
+ if args.bounded_dot:dot_radius_scale=math('FClamp',math('Multiply_FloatFloat',prop('HitDistance'),fl(.000012)),fl(.004),fl(.015))
  dot_scale=math('MakeVector',dot_radius_scale,dot_radius_scale,fl(.0001))
  jump('spawn_dot',valid(prop('EkoroLaserDot')));jump('update_dot')
  label('spawn_dot')
@@ -131,4 +133,5 @@ p.changes[target]=raw[:loc]+struct.pack('<ii',vm,len(program))+program+raw[loc+8
 p.save(root/f'work/muzzle-pointer-{version}/VRGG/Actors/PointerComponent')
 report={'old_VM':oldvm,'new_VM':vm,'tail_VM':oldvm-1,'resume_VM':me,'key':None if args.always_on else toggle_key,'quest_button':None if args.always_on else 'Right A','default_enabled':args.always_on,'always_on':args.always_on,'beam_diameter_cm':.3 if args.visible else .1,'beam_alpha':.50 if args.dot else .30 if args.visible else .10,'source_offset_cm':[.15,0,-2.248535],'new_fields':[beam,enabled]}
 if args.dot:report.update(new_fields=[beam,enabled,dot_field],dot_crosshair_fraction=.12,dot_depth_offset_cm=.1,dot_alpha=.85,beam_color=[1,.35,.65])
+if args.bounded_dot:report.update(dot_crosshair_fraction=None,dot_diameter_range_cm=[.4,1.5])
 (root/f'outputs/Laser_{version}_build.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))
