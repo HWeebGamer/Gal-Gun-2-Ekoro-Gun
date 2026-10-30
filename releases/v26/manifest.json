@@ -1,0 +1,41 @@
+{
+  "version": "v26",
+  "editions": [
+    {
+      "edition": "Laser Always On",
+      "zip": "GalGun2_VR_Ekoro_Gun_v26_Laser_Always_On.zip",
+      "files": [
+        {
+          "name": "EkoroPrototype_P.pak",
+          "source": "EkoroMuzzlePointer_v26_P.pak",
+          "bytes": 1267293,
+          "sha256": "ea615ba0447e30171c34d3ed363f9833270bb0496fe3d472c00aaf50122d188a"
+        },
+        {
+          "name": "EkoroPrototype_P.sig",
+          "source": "EkoroMuzzlePointer_v26_P.sig",
+          "bytes": 332904,
+          "sha256": "04d3ac53a0c186b9d89731d8fb8447fff575540cb56688063f40027dcab91e9a"
+        }
+      ]
+    },
+    {
+      "edition": "No Laser",
+      "zip": "GalGun2_VR_Ekoro_Gun_v26_No_Laser.zip",
+      "files": [
+        {
+          "name": "EkoroPrototype_P.pak",
+          "source": "EkoroMuzzlePointer_v26_NoLaser_P.pak",
+          "bytes": 1233665,
+          "sha256": "dbe05d393da3af06564b0b78963e5a2bb10e22649297e1ea740687026f0c476a"
+        },
+        {
+          "name": "EkoroPrototype_P.sig",
+          "source": "EkoroMuzzlePointer_v26_P.sig",
+          "bytes": 332904,
+          "sha256": "04d3ac53a0c186b9d89731d8fb8447fff575540cb56688063f40027dcab91e9a"
+        }
+      ]
+    }
+  ]
+}
