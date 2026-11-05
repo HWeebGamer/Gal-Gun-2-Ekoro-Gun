@@ -48,3 +48,13 @@ The patcher checks bytecode control flow and context skip lengths. The diagnosti
 ## Release workflow
 
 Make source changes in this checkout, validate locally, commit the scripts and notes, then attach a versioned install ZIP to a GitHub release pointing at that commit. Keep generated assets out of Git history. The initial v12 release was confirmed working by the user on October 28, 2026.
+
+## v28 stabilization and attachment editions
+
+`build_stabilizer.py` patches the v26 pawn; `verify_stabilizer.py` executes the emitted prefix against mocked component/rotation calls. It applies an 18ms shortest-path rotational filter with a 0.7-degree per-axis bypass. By-reference native arguments use reflected property storage. Tick ordering places motion-controller tracking before the pawn and the pointer after it. Render-thread late update is retained; headset checks remain necessary.
+
+The approved optic is authored by `build_white_optic_v2.py`; `export_white_optic.py -- --no-laser` (passed through Blender) exports the sight-only variant from the local original gun prototype. Without that flag it exports laser+sight. Local Blender inputs, cooked assets and engine binaries are not included. Paths currently follow the author's workspace layout.
+
+For release assembly, extract v26 laser/no-laser packages into `work/release-v28-base-laser` and `work/release-v28-base-nolaser`. Supply the cooked sight-only mesh pair, the confirmed v27 optic mesh pair under the parent workspace's `work/optic-v27-payload/Player/DevilSweeper`, and the tested v28 Laser+Sight PAK/SIG under their `StabilizerTest` names in `outputs`.
+
+Run `python work/package_v28_editions.py --unrealpak PATH --only-sight-cooked DIRECTORY`, followed by `python work/package_release_variants.py v28`. The first script validates allowed payload differences, identical stabilization code across all editions, UnrealPak integrity and extracted hashes. The second validates manifest hashes and ZIP round trips. Generated game assets remain excluded from Git; release assets contain the complete install pairs. See `releases/v28/NOTES.md` for tested scope.

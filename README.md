@@ -4,12 +4,16 @@ Ekoro's gun imported into Gal*Gun 2 VR, with a right-hand grip, a barrel-aligned
 
 ## Download and install
 
-Download **one** edition from the [v26 release](https://github.com/HWeebGamer/Gal-Gun-2-Ekoro-Gun/releases/tag/v26):
+Download **one** edition from the [v28 release](https://github.com/HWeebGamer/Gal-Gun-2-Ekoro-Gun/releases/tag/v28):
 
-- **GalGun2_VR_Ekoro_Gun_v26_Laser_Always_On.zip** — under-barrel attachment, lighter pink beam at 50% particle opacity, and a small pink aiming dot. Automatically active during gameplay; no toggle or companion program.
-- **GalGun2_VR_Ekoro_Gun_v26_No_Laser.zip** — no laser beam, laser dot, or under-barrel attachment.
+| Edition | Laser | White sight |
+| --- | --- | --- |
+| **Laser+Sight** | Yes | Yes |
+| **NoAttachments** | No | No |
+| **LaserNoSight** | Yes | No |
+| **OnlySight** | No | Yes |
 
-**Both editions include the story-choice cursor and correct hovered-choice selection fix**, along with the Ekoro gun, dynamic crosshair, menu pointer, and brief heart muzzle effects. Use one of these mod ZIPs, not GitHub's automatically generated source-code ZIP.
+**All four include light anti-wobble stabilization**, the story-choice cursor/selection fix, dynamic crosshair, menu pointer, and brief heart muzzle effects. Each ZIP is a complete mod; attachments are not separate add-on PAKs. Use one mod ZIP, not GitHub's source-code ZIP.
 
 1. Close the game.
 2. Open the installation directory through Steam: Properties → Installed Files → Browse.
@@ -17,13 +21,17 @@ Download **one** edition from the [v26 release](https://github.com/HWeebGamer/Ga
 4. Extract both `EkoroPrototype_P.pak` and `EkoroPrototype_P.sig` directly into `~mods`.
 5. Launch the game in VR normally.
 
-Back up any previous mod pair outside `Paks` before replacing it. Both editions use the same installed filenames: install only one pair at a time. To switch editions, close the game and replace that pair. Remove older versions of this mod, including differently named copies. Leave the original game archives untouched. Other weapon, pawn, or menu mods may conflict.
+Back up any previous mod pair outside `Paks` before replacing it. All four editions use the same installed filenames: install only one pair at a time. To switch editions, close the game and replace that pair. Remove older versions of this mod, including differently named copies. Leave the original game archives untouched. Other weapon, pawn, or menu mods may conflict.
 
 To uninstall, close the game and remove only those two mod files from `~mods`.
 
 ## Status
 
-The author confirmed the v26 story-choice fix on their Meta Quest 2 PC VR setup, using the laser edition. Both packaged editions were verified to contain the exact same patched story-choice actor and pawn. The no-laser edition has not had a separate v26 headset test. The tested game is the Windows Steam version, build 3345483. Other builds and headsets have not been verified. Two-handed grip is not implemented.
+The author confirmed the v28 Laser+Sight build on Meta Quest 2 PC VR. The other three editions have matching stabilization and story-choice code and passed archive checks, but have not had separate v28 headset tests. The tested game is the Windows Steam version, build 3345483. Other builds/headsets remain unverified. Two-handed grip is not implemented.
+
+Stabilization gently smooths tiny rotational movements with an 18 ms time constant; larger turns bypass the filter. Position follows the controller directly. Menus, story cursor overrides, tracking loss and frame hitches reset the filter. This is motion smoothing, not target lock or aim assist toward enemies.
+
+The white sight has a clear opening through which you use the existing world-space crosshair; it does not have a separately projected optic dot. Laser editions include an automatic pink beam, small center marker and under-barrel housing. No toggle or companion bridge is needed.
 
 The crosshair's displayed reach is 50 metres, matching the existing targeting range. It gradually looks smaller at longer distances, shrinks another 20% over supported enemies, and smoothly recovers when aimed away. Story choices now show the VR cursor and update the confirmed choice when hovering different options, including right-side choices.
 
