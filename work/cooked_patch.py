@@ -29,7 +29,7 @@ class Package:
  def add_property(self,name,template,owner,object_class=None):
   """Append a reflected Blueprint field without renumbering existing exports."""
   n=self.ns;ti=self.index(template);original=self.exports[ti];body=bytearray(self.body(ti))
-  assert len(body) in (34,36), 'Only simple bool/object property templates supported'
+  assert len(body) in (32,34,36), 'Only simple scalar, bool, object or struct property templates supported'
   # UProperty ArrayDim followed by flags: transient, non-replicated state.
   struct.pack_into('<Q',body,16,0x2000)
   if object_class is not None:struct.pack_into('<i',body,len(body)-4,object_class)

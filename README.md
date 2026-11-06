@@ -4,9 +4,9 @@ Ekoro's gun imported into Gal*Gun 2 VR, with a right-hand grip, a barrel-aligned
 
 ## Download and install
 
-Download **one** edition from the [v28 release](https://github.com/HWeebGamer/Gal-Gun-2-Ekoro-Gun/releases/tag/v28):
+Download **one** edition from the [v33 release](https://github.com/HWeebGamer/Gal-Gun-2-Ekoro-Gun/releases/tag/v33):
 
-| Edition | Laser | White sight |
+| Edition | Laser | Circular white sight |
 | --- | --- | --- |
 | **Laser+Sight** | Yes | Yes |
 | **NoAttachments** | No | No |
@@ -27,11 +27,11 @@ To uninstall, close the game and remove only those two mod files from `~mods`.
 
 ## Status
 
-The author confirmed the v28 Laser+Sight build on Meta Quest 2 PC VR. The other three editions have matching stabilization and story-choice code and passed archive checks, but have not had separate v28 headset tests. The tested game is the Windows Steam version, build 3345483. Other builds/headsets remain unverified. Two-handed grip is not implemented.
+The author confirmed the v33 Laser+Sight build on Meta Quest 2 PC VR. The other three editions have matching stabilization and story-choice code and passed archive checks, but have not had separate v33 headset tests. The tested game is the Windows Steam version, build 3345483. Other builds/headsets remain unverified. Two-handed grip is not implemented.
 
 Stabilization gently smooths tiny rotational movements with an 18 ms time constant; larger turns bypass the filter. Position follows the controller directly. Menus, story cursor overrides, tracking loss and frame hitches reset the filter. This is motion smoothing, not target lock or aim assist toward enemies.
 
-The white sight has a clear opening through which you use the existing world-space crosshair; it does not have a separately projected optic dot. Laser editions include an automatic pink beam, small center marker and under-barrel housing. No toggle or companion bridge is needed.
+The circular white sight has a clear opening through which you use the existing world-space crosshair; it does not have a separately projected optic dot. Laser editions include an automatic pink beam, small center marker and under-barrel housing. No toggle or companion bridge is needed.
 
 The crosshair's displayed reach is 50 metres, matching the existing targeting range. It gradually looks smaller at longer distances, shrinks another 20% over supported enemies, and smoothly recovers when aimed away. Story choices now show the VR cursor and update the confirmed choice when hovering different options, including right-side choices.
 

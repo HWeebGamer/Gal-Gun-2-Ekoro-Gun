@@ -1,0 +1,77 @@
+{
+  "version": "v33",
+  "editions": [
+    {
+      "edition": "Laser+Sight",
+      "zip": "GalGun2_VR_Ekoro_Gun_v33_Laser+Sight.zip",
+      "files": [
+        {
+          "name": "EkoroPrototype_P.pak",
+          "source": "EkoroMuzzlePointer_v33_Laser+Sight_P.pak",
+          "bytes": 2020333,
+          "sha256": "96eca67980f8adfd62f4558fb2cdb8d8aed4bf8bc7155bc3931c0994fac8f509"
+        },
+        {
+          "name": "EkoroPrototype_P.sig",
+          "source": "EkoroMuzzlePointer_v33_VacuumFade_P.sig",
+          "bytes": 332904,
+          "sha256": "04d3ac53a0c186b9d89731d8fb8447fff575540cb56688063f40027dcab91e9a"
+        }
+      ]
+    },
+    {
+      "edition": "NoAttachments",
+      "zip": "GalGun2_VR_Ekoro_Gun_v33_NoAttachments.zip",
+      "files": [
+        {
+          "name": "EkoroPrototype_P.pak",
+          "source": "EkoroMuzzlePointer_v33_NoAttachments_P.pak",
+          "bytes": 1870042,
+          "sha256": "9babf2c8539ed5fcdf10269af26a2fec7fb17ae963d0a2dcbb761905457466a8"
+        },
+        {
+          "name": "EkoroPrototype_P.sig",
+          "source": "EkoroMuzzlePointer_v33_VacuumFade_P.sig",
+          "bytes": 332904,
+          "sha256": "04d3ac53a0c186b9d89731d8fb8447fff575540cb56688063f40027dcab91e9a"
+        }
+      ]
+    },
+    {
+      "edition": "LaserNoSight",
+      "zip": "GalGun2_VR_Ekoro_Gun_v33_LaserNoSight.zip",
+      "files": [
+        {
+          "name": "EkoroPrototype_P.pak",
+          "source": "EkoroMuzzlePointer_v33_LaserNoSight_P.pak",
+          "bytes": 1903670,
+          "sha256": "30d8e71cdac387354fae6a71244da78c2645d562336ffe76139e1acc6cc31512"
+        },
+        {
+          "name": "EkoroPrototype_P.sig",
+          "source": "EkoroMuzzlePointer_v33_VacuumFade_P.sig",
+          "bytes": 332904,
+          "sha256": "04d3ac53a0c186b9d89731d8fb8447fff575540cb56688063f40027dcab91e9a"
+        }
+      ]
+    },
+    {
+      "edition": "OnlySight",
+      "zip": "GalGun2_VR_Ekoro_Gun_v33_OnlySight.zip",
+      "files": [
+        {
+          "name": "EkoroPrototype_P.pak",
+          "source": "EkoroMuzzlePointer_v33_OnlySight_P.pak",
+          "bytes": 1987551,
+          "sha256": "8933eb444cc3aea464b777c7c9fdd8577f09205c467eab0e5e0abd968ac18db8"
+        },
+        {
+          "name": "EkoroPrototype_P.sig",
+          "source": "EkoroMuzzlePointer_v33_VacuumFade_P.sig",
+          "bytes": 332904,
+          "sha256": "04d3ac53a0c186b9d89731d8fb8447fff575540cb56688063f40027dcab91e9a"
+        }
+      ]
+    }
+  ]
+}
