@@ -1,10 +1,12 @@
 # Gal*Gun 2 VR — Ekoro Gun
 
+**v33 is the final build. Development is complete.**
+
 Ekoro's gun imported into Gal*Gun 2 VR, with a right-hand grip, a barrel-aligned gameplay crosshair, and gun-pointer menu navigation with trigger selection.
 
 ## Download and install
 
-Download **one** edition from the [v33 release](https://github.com/HWeebGamer/Gal-Gun-2-Ekoro-Gun/releases/tag/v33):
+Download **one** edition from the [v33 final build](https://github.com/HWeebGamer/Gal-Gun-2-Ekoro-Gun/releases/tag/v33):
 
 | Edition | Laser | Circular white sight |
 | --- | --- | --- |
